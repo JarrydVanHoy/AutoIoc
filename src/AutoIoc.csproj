@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>AutoIoc</RootNamespace>
+        <PackageId>AutoIoc</PackageId>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Authors>Jarryd Van Hoy (@JarrydVanHoy)</Authors>
+        <PackageProjectUrl>https://github.com/JarrydVanHoy/AutoIoc</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/JarrydVanHoy/AutoIoc</RepositoryUrl>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <Description>Easily add dependencies to your dependency injection container with attributes.  This includes services, options, and HTTP clients.</Description>
+        <PackageTags>autoioc auto ioc di inversion control dependency injection attribute</PackageTags>
+        <PackageReleaseNotes>
+            Initial Release
+        </PackageReleaseNotes>
+        <Version>0.0.0-alpha01</Version>
+        <PackageIcon>icon.jpeg</PackageIcon>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DocumentationFile>bin\Release\net6.0\AutoIoc.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\LICENSE" Pack="true" PackagePath="" />
+        <None Include="..\README.md" Pack="true" PackagePath="" />
+        <None Include="..\icon.jpeg" Pack="true" PackagePath="" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>$(MSBuildProjectName).UnitTests</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
+      <PackageReference Include="Refit" Version="6.3.2" />
+      <PackageReference Include="Refit.HttpClientFactory" Version="6.3.2" />
+      <PackageReference Include="ThrowIfArgument" Version="1.0.2" />
+    </ItemGroup>
+</Project>

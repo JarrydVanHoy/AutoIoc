@@ -211,11 +211,11 @@ Now you can add as many as you want via attributes:
 public class AuthDelegatingHandler : DelegatingHandler { }
 
 // examples and order matters
-[HttpClient(PrimaryHandler = typeof(CustomPrimaryHandler)]
-[HttpClient(PrimaryHandler = typeof(CustomPrimaryHandler), typeof(AuthDelegatingHandler)]
-[HttpClient(PrimaryHandler = typeof(CustomPrimaryHandler), typeof(AuthDelegatingHandler), typeof(RandomDelegatingHandler)]
-[HttpClient(typeof(AuthDelegatingHandler)]  
-[HttpClient(typeof(AuthDelegatingHandler), typeof(RandomDelegatingHandler)]  
+[HttpClient(PrimaryHandler = typeof(CustomPrimaryHandler))]
+[HttpClient(typeof(AuthDelegatingHandler), PrimaryHandler = typeof(CustomPrimaryHandler))]
+[HttpClient(typeof(AuthDelegatingHandler), typeof(RandomDelegatingHandler), PrimaryHandler = typeof(CustomPrimaryHandler))]
+[HttpClient(typeof(AuthDelegatingHandler))]  
+[HttpClient(typeof(AuthDelegatingHandler), typeof(RandomDelegatingHandler))]  
 ```
 
 ---

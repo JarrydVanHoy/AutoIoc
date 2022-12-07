@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace AutoIoc;
+namespace AutoIoc.Extensions;
 
 internal static class AssemblyExtensions
 {
@@ -61,7 +61,7 @@ internal static class AssemblyExtensions
         return result.Select(_ => (_.ConfigurationType, _.ConfigurationSections.First()));
     }
 
-    internal static IEnumerable<(Type Service, Type? PrimaryHandler, IEnumerable<Type> DelegatingHandlers)> GetAutoIocHttpClients
+    internal static IEnumerable<(Type Client, Type? PrimaryHandler, IEnumerable<Type> DelegatingHandlers)> GetAutoIocHttpClients
     (
         this Assembly assembly
     )

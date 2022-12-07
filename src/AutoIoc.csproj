@@ -12,17 +12,17 @@
         <RepositoryUrl>https://github.com/JarrydVanHoy/AutoIoc</RepositoryUrl>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <Description>Easily add dependencies to your dependency injection container with attributes.  This includes services, options, and HTTP clients.</Description>
+        <Description>Easily add dependencies to your dependency injection container with attributes. This includes services, options, and HTTP clients.</Description>
         <PackageTags>autoioc auto ioc di inversion control dependency injection attribute</PackageTags>
         <PackageReleaseNotes>
             Initial Release
         </PackageReleaseNotes>
-        <Version>0.0.0-alpha01</Version>
+        <Version>0.0.0-alpha02</Version>
         <PackageIcon>icon.jpeg</PackageIcon>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <DocumentationFile>bin\Release\net6.0\AutoIoc.xml</DocumentationFile>
+        <DocumentationFile>bin\Release\net6.0\AutoIoc.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -38,13 +38,13 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
-      <PackageReference Include="Refit" Version="6.3.2" />
-      <PackageReference Include="Refit.HttpClientFactory" Version="6.3.2" />
-      <PackageReference Include="ThrowIfArgument" Version="1.0.2" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
+        <PackageReference Include="Refit" Version="6.3.2" />
+        <PackageReference Include="Refit.HttpClientFactory" Version="6.3.2" />
+        <PackageReference Include="ThrowIfArgument" Version="1.0.2" />
     </ItemGroup>
 </Project>

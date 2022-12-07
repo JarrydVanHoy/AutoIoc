@@ -9,10 +9,20 @@ using ThrowIfArgument;
 
 namespace AutoIoc;
 
+/// <summary>
+///     Service collection extensions to add Auto IOC capabilities to your DI container.
+/// </summary>
 public static class ServiceCollectionExtensions
 {
     private static bool _init;
 
+    /// <summary>
+    ///     Adds AutoIoc to your project which will assembly scan for services, options, and HTTP clients to add to your DI container.
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configuration"></param>
+    /// <param name="assembly"></param>
+    /// <returns><paramref name="services" /> for chaining</returns>
     public static IServiceCollection AddAutoIoc
     (
         this IServiceCollection services,
@@ -67,6 +77,7 @@ public static class ServiceCollectionExtensions
                         case IocLifetime.Singleton:
                             services.AddSingleton(@interface, service);
                             break;
+                        case IocLifetime.None:
                         default:
                             throw new ArgumentOutOfRangeException($"Unhandle IOC lifetime: '{lifetime}' for service: '{service.FullName}'");
                     }
@@ -135,35 +146,40 @@ public static class ServiceCollectionExtensions
             return services;
         }
 
-        foreach (var (service, primaryHandler, delegatingHandlers) in clients)
+        foreach (var (client, primaryHandler, delegatingHandlers) in clients)
         {
             IHttpClientBuilder httpClientBuilder;
 
-            if (service.IsInterface)
+            if (client.IsInterface)
             {
-                var appSettingsKey = service.Name[1..].Replace("Client", string.Empty);
+                if (!client.IsRefitClient())
+                {
+                    throw new AutoIocException($"Type: '{client.FullName}' does not look to be setup as a Refit client");
+                }
+
+                var appSettingsKey = client.Name[1..].Replace("Client", string.Empty);
 
                 if (!configuration.GetSection(appSettingsKey).Exists())
                 {
                     throw new AutoIocException($"Missing required app settings key: '{appSettingsKey}'.");
                 }
 
-                var httpClientConfiguration = configuration.GetRequiredConfiguration<HttpClientConfigurationBase>(appSettingsKey);
+                var httpClientConfiguration = configuration.GetRequiredConfiguration<HttpClientConfiguration>(appSettingsKey);
 
-                httpClientBuilder = services.AddRefitClient(service)
+                httpClientBuilder = services.AddRefitClient(client)
                     .ConfigureHttpClient(_ =>
                     {
                         _.BaseAddress = httpClientConfiguration.BaseAddress
-                                        ?? throw new AutoIocException($"App settings missing value for key '{appSettingsKey}.{nameof(HttpClientConfigurationBase.BaseAddress)}'.");
+                                        ?? throw new AutoIocException($"App settings missing value for key '{appSettingsKey}.{nameof(HttpClientConfiguration.BaseAddress)}'.");
                         _.Timeout = TimeSpan.FromSeconds(Math.Abs(httpClientConfiguration.TimeoutSeconds));
                     });
             }
             else
             {
-                var @interface = service.GetInterfaces().Single();
+                var @interface = client.GetInterfaces().Single();
 
                 httpClientBuilder = (IHttpClientBuilder) addHttpClientMethodInfo
-                    .MakeGenericMethod(@interface, service)
+                    .MakeGenericMethod(@interface, client)
                     .Invoke(null, new object[] {services})!;
             }
 

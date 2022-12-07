@@ -1,5 +1,9 @@
 namespace AutoIoc;
 
+/// <summary>
+///     Automatically binds your application settings to the class you've attributed. By default we use the class name, minus the '*Configuration' or '*Config' postfix, to find the configuration
+///     section within application settings to bind to.
+/// </summary>
 [AttributeUsage(AttributeTargets.Class)]
 public class BindOptionsAttribute : Attribute
 {

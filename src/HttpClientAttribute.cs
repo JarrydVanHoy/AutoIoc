@@ -44,6 +44,12 @@ public class HttpClientAttribute : Attribute
         set => _primaryHandler = ValidatePrimaryHandlerHandlerType(value);
     }
 
+    /// <summary>
+    /// If unable to add to the IOC, and exception will be thrown, otherwise a console log will indicate that it was unable to be added.
+    /// Default: true
+    /// </summary>
+    public bool Required { get; set; } = true;
+
     private static IEnumerable<Type> ValidateDelegatingHandlerTypes
     (
         IEnumerable<Type> delegatingHandlers

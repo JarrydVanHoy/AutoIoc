@@ -20,7 +20,7 @@ internal static class ConfigurationExtensions
             throw new AutoIocException($"Missing or invalid configuration section: '{appSettingsKey}'");
         }
 
-        var value = (T) section.Get(typeof(T));
+        var value = (T?) section.Get(typeof(T?));
 
         Console.WriteLine(section.Value);
 

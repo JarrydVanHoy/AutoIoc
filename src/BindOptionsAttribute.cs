@@ -21,4 +21,10 @@ public class BindOptionsAttribute : Attribute
     {
         ConfigurationSection = configurationSection;
     }
+
+    /// <summary>
+    /// If unable to add to the IOC, and exception will be thrown, otherwise a console log will indicate that it was unable to be added.
+    /// Default: true
+    /// </summary>
+    public bool Required { get; set; } = true;
 }

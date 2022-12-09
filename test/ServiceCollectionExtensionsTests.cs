@@ -20,7 +20,7 @@ public class ServiceCollectionExtensionsTests
             {
                 {nameof(AssemblyExtensionsTests.TestAutoIocConfig), string.Empty},
                 {$"{nameof(TypeExtensionsTests.IRefitInterface)[1..]}:{nameof(HttpClientConfiguration.BaseAddress)}", "http://fake.domain.com"}
-            })
+            }!)
             .Build();
     }
 

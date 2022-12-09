@@ -17,7 +17,7 @@ public class ConfigurationExtensionsTests
     )
     {
         var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string>())
+            .AddInMemoryCollection(new Dictionary<string, string>()!)
             .Build();
 
         var act = () => configuration.GetRequiredConfiguration<TestConfiguration>(appSettingsKey);
@@ -38,7 +38,7 @@ public class ConfigurationExtensionsTests
             .AddInMemoryCollection(new Dictionary<string, string>
             {
                 {appSettingsKey, randomValue}
-            })
+            }!)
             .Build();
 
         var act = () => configuration.GetRequiredConfiguration<TestConfiguration>(appSettingsKey);
@@ -60,7 +60,7 @@ public class ConfigurationExtensionsTests
             {
                 {$"{appSettingsKey}:{nameof(TestConfiguration.TestString)}", $"{expected.TestString}"},
                 {$"{appSettingsKey}:{nameof(TestConfiguration.TestInt)}", $"{expected.TestInt}"}
-            })
+            }!)
             .Build();
 
         var result = configuration.GetRequiredConfiguration<TestConfiguration>(appSettingsKey);

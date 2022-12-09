@@ -1,10 +1,10 @@
-using System.Reflection;
 using AutoIoc.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Refit;
+using System.Reflection;
 using ThrowIfArgument;
 
 namespace AutoIoc;
@@ -14,7 +14,7 @@ namespace AutoIoc;
 /// </summary>
 public static class ServiceCollectionExtensions
 {
-    private static bool _init;
+    private static readonly HashSet<Assembly> Init = new();
 
     /// <summary>
     ///     Adds AutoIoc to your project which will assembly scan for services, options, and HTTP clients to add to your DI container.
@@ -30,18 +30,43 @@ public static class ServiceCollectionExtensions
         Assembly assembly
     )
     {
+        return services.AddAutoIoc(configuration, new[] {assembly});
+    }
+
+    /// <summary>
+    ///     Adds AutoIoc to your project which will assembly scan for services, options, and HTTP clients to add to your DI container.
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configuration"></param>
+    /// <param name="assemblies"></param>
+    /// <returns><paramref name="services" /> for chaining</returns>
+    public static IServiceCollection AddAutoIoc
+    (
+        this IServiceCollection services,
+        IConfiguration configuration,
+        params Assembly[] assemblies
+    )
+    {
         ThrowIf.Argument.IsNull(services);
+        ThrowIf.Argument.IsNull(configuration);
+        ThrowIf.Argument.IsEmpty(assemblies);
 
-        if (_init)
+        assemblies.ToList().ForEach(assembly =>
         {
-            return services;
-        }
+            if (Init.Contains(assembly))
+            {
+                return;
+            }
 
-        _init = true;
+            Init.Add(assembly);
 
-        return services.AddAutoIocServices(assembly)
-            .AddAutoIocOptions(assembly, configuration)
-            .AddAutoIocHttpClients(assembly, configuration);
+            services
+                .AddAutoIocServices(assembly)
+                .AddAutoIocOptions(assembly, configuration)
+                .AddAutoIocHttpClients(assembly, configuration);
+        });
+
+        return services;
     }
 
     private static IServiceCollection AddAutoIocServices

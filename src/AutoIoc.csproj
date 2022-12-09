@@ -15,9 +15,9 @@
         <Description>Easily add dependencies to your dependency injection container with attributes. This includes services, options, and HTTP clients.</Description>
         <PackageTags>autoioc auto ioc di inversion control dependency injection attribute</PackageTags>
         <PackageReleaseNotes>
-            NET 7.0 Support
+            Allowing AutoIoc to work w/o succesfully adding items to the IOC
         </PackageReleaseNotes>
-        <Version>1.0.1</Version>
+        <Version>1.1.0</Version>
         <PackageIcon>icon.jpeg</PackageIcon>
     </PropertyGroup>
 

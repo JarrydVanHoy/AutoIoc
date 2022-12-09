@@ -104,13 +104,19 @@ public static class ServiceCollectionExtensions
 
         services.AddOptions();
 
-        foreach (var (configurationType, configurationSection) in options)
+        foreach (var (configurationType, configurationSection, required) in options)
         {
             var section = configuration.GetSection(configurationSection);
 
             if (!section.Exists())
             {
-                throw new AutoIocException($"Cannot find configuration section: '{configurationSection}'");
+                if (required)
+                {
+                    throw new AutoIocException($"Cannot find configuration section: '{configurationSection}'");
+                }
+
+                Console.WriteLine($"Unable to bind options of type: '{configurationType.Name}' due to missing app settings key: '{configurationSection}'");
+                continue;
             }
 
             services.AddSingleton(
@@ -136,8 +142,7 @@ public static class ServiceCollectionExtensions
     {
         var addHttpClientMethodInfo = typeof(HttpClientFactoryServiceCollectionExtensions)
             .GetMethods()
-            .Single(_ => _.ToString() ==
-                         "Microsoft.Extensions.DependencyInjection.IHttpClientBuilder AddHttpClient[TClient,TImplementation](Microsoft.Extensions.DependencyInjection.IServiceCollection)");
+            .Single(_ => _.ToString() == "Microsoft.Extensions.DependencyInjection.IHttpClientBuilder AddHttpClient[TClient,TImplementation](Microsoft.Extensions.DependencyInjection.IServiceCollection)");
 
         var clients = assembly.GetAutoIocHttpClients().ToList();
 
@@ -146,7 +151,7 @@ public static class ServiceCollectionExtensions
             return services;
         }
 
-        foreach (var (client, primaryHandler, delegatingHandlers) in clients)
+        foreach (var (client, primaryHandler, delegatingHandlers, required) in clients)
         {
             IHttpClientBuilder httpClientBuilder;
 
@@ -161,7 +166,13 @@ public static class ServiceCollectionExtensions
 
                 if (!configuration.GetSection(appSettingsKey).Exists())
                 {
-                    throw new AutoIocException($"Missing required app settings key: '{appSettingsKey}'.");
+                    if (required)
+                    {
+                        throw new AutoIocException($"Missing required app settings key: '{appSettingsKey}'.");
+                    }
+
+                    Console.WriteLine($"Unable to add the client class type: '{client.Name}' due to missing app settings key: '{appSettingsKey}'");
+                    continue;
                 }
 
                 var httpClientConfiguration = configuration.GetRequiredConfiguration<HttpClientConfiguration>(appSettingsKey);

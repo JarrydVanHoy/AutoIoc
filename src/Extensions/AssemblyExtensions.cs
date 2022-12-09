@@ -4,8 +4,7 @@ namespace AutoIoc.Extensions;
 
 internal static class AssemblyExtensions
 {
-    internal static IEnumerable<(Type Service, IocLifetime Lifetimes)> GetAutoIocServices
-    (
+    internal static IEnumerable<(Type Service, IocLifetime Lifetimes)> GetAutoIocServices(
         this Assembly assembly
     )
     {
@@ -30,8 +29,7 @@ internal static class AssemblyExtensions
             ));
     }
 
-    internal static IEnumerable<(Type ConfigurationType, string ConfigurationSection)> GetAutoIocOptions
-    (
+    internal static IEnumerable<(Type ConfigurationType, string ConfigurationSection, bool Required)> GetAutoIocOptions(
         this Assembly assembly
     )
     {
@@ -45,7 +43,7 @@ internal static class AssemblyExtensions
 
         var result = types.Select(type => (
                 ConfigurationType: type,
-                ConfigurationSections: type.GetCustomAttributes()
+                ConfigurationSection: type.GetCustomAttributes()
                     .Where(a => a.GetType() == attribute)
                     .Select(a =>
                     {
@@ -55,14 +53,18 @@ internal static class AssemblyExtensions
                             ? type.Name.Replace("Configuration", string.Empty)
                             : configSection;
                     })
+                    .First(),
+                Required: type.GetCustomAttributes()
+                    .Where(a => a.GetType() == attribute)
+                    .Select(a => ((BindOptionsAttribute) a).Required)
+                    .First()
             ))
             .ToList();
 
-        return result.Select(_ => (_.ConfigurationType, _.ConfigurationSections.First()));
+        return result.Select(_ => (_.ConfigurationType, _.ConfigurationSection, _.Required));
     }
 
-    internal static IEnumerable<(Type Client, Type? PrimaryHandler, IEnumerable<Type> DelegatingHandlers)> GetAutoIocHttpClients
-    (
+    internal static IEnumerable<(Type Client, Type? PrimaryHandler, IEnumerable<Type> DelegatingHandlers, bool Required)> GetAutoIocHttpClients(
         this Assembly assembly
     )
     {
@@ -82,7 +84,8 @@ internal static class AssemblyExtensions
                 return (
                     type,
                     curr.PrimaryHandler,
-                    curr.DelegatingHandlers
+                    curr.DelegatingHandlers,
+                    curr.Required
                 );
             });
     }

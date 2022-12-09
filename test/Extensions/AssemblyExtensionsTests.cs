@@ -1,7 +1,7 @@
-using System.Linq;
-using System.Reflection;
 using AutoIoc.Extensions;
 using FluentAssertions;
+using System.Linq;
+using System.Reflection;
 using Xunit;
 
 namespace AutoIoc.UnitTests.Extensions;
@@ -23,7 +23,7 @@ public class AssemblyExtensionsTests
     {
         var result = _sut.GetAutoIocOptions();
 
-        result.Should().Contain((typeof(TestAutoIocConfig), nameof(TestAutoIocConfig)));
+        result.Should().Contain((typeof(TestAutoIocConfig), nameof(TestAutoIocConfig), true));
     }
 
     [Fact]

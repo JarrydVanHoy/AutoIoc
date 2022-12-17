@@ -15,9 +15,9 @@
         <Description>Easily add dependencies to your dependency injection container with attributes. This includes services, options, and HTTP clients.</Description>
         <PackageTags>autoioc auto ioc di inversion control dependency injection attribute</PackageTags>
         <PackageReleaseNotes>
-            Adding ability to target multiple assemblies
+            Providing a default JSON serializer for ReFit clients which can parse strings as numbers and enums
         </PackageReleaseNotes>
-        <Version>1.2.0</Version>
+        <Version>1.3.0</Version>
         <PackageIcon>icon.jpeg</PackageIcon>
     </PropertyGroup>
 

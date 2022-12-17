@@ -4,7 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Refit;
+using System.Globalization;
 using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using ThrowIfArgument;
 
 namespace AutoIoc;
@@ -15,6 +18,7 @@ namespace AutoIoc;
 public static class ServiceCollectionExtensions
 {
     private static readonly HashSet<Assembly> Init = new();
+    private static JsonSerializerOptions? _defaultSerializerOptions;
 
     /// <summary>
     ///     Adds AutoIoc to your project which will assembly scan for services, options, and HTTP clients to add to your DI container.
@@ -23,8 +27,7 @@ public static class ServiceCollectionExtensions
     /// <param name="configuration"></param>
     /// <param name="assembly"></param>
     /// <returns><paramref name="services" /> for chaining</returns>
-    public static IServiceCollection AddAutoIoc
-    (
+    public static IServiceCollection AddAutoIoc(
         this IServiceCollection services,
         IConfiguration configuration,
         Assembly assembly
@@ -40,8 +43,7 @@ public static class ServiceCollectionExtensions
     /// <param name="configuration"></param>
     /// <param name="assemblies"></param>
     /// <returns><paramref name="services" /> for chaining</returns>
-    public static IServiceCollection AddAutoIoc
-    (
+    public static IServiceCollection AddAutoIoc(
         this IServiceCollection services,
         IConfiguration configuration,
         params Assembly[] assemblies
@@ -69,8 +71,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddAutoIocServices
-    (
+    private static IServiceCollection AddAutoIocServices(
         this IServiceCollection services,
         Assembly assembly
     )
@@ -113,8 +114,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddAutoIocOptions
-    (
+    private static IServiceCollection AddAutoIocOptions(
         this IServiceCollection services,
         Assembly assembly,
         IConfiguration configuration
@@ -158,8 +158,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddAutoIocHttpClients
-    (
+    private static IServiceCollection AddAutoIocHttpClients(
         this IServiceCollection services,
         Assembly assembly,
         IConfiguration configuration
@@ -176,7 +175,7 @@ public static class ServiceCollectionExtensions
             return services;
         }
 
-        foreach (var (client, primaryHandler, delegatingHandlers, required) in clients)
+        foreach (var (client, httpClientAttribute) in clients)
         {
             IHttpClientBuilder httpClientBuilder;
 
@@ -191,7 +190,7 @@ public static class ServiceCollectionExtensions
 
                 if (!configuration.GetSection(appSettingsKey).Exists())
                 {
-                    if (required)
+                    if (httpClientAttribute.Required)
                     {
                         throw new AutoIocException($"Missing required app settings key: '{appSettingsKey}'.");
                     }
@@ -202,7 +201,10 @@ public static class ServiceCollectionExtensions
 
                 var httpClientConfiguration = configuration.GetRequiredConfiguration<HttpClientConfiguration>(appSettingsKey);
 
-                httpClientBuilder = services.AddRefitClient(client)
+                httpClientBuilder = services
+                    .AddRefitClient(
+                        client,
+                        new RefitSettings(new SystemTextJsonContentSerializer(httpClientAttribute.JsonSerializerOptions ?? GetDefaultSerializerOptions())))
                     .ConfigureHttpClient(_ =>
                     {
                         _.BaseAddress = httpClientConfiguration.BaseAddress
@@ -219,12 +221,12 @@ public static class ServiceCollectionExtensions
                     .Invoke(null, new object[] {services})!;
             }
 
-            if (primaryHandler is not null)
+            if (httpClientAttribute.PrimaryHandler is not null)
             {
-                httpClientBuilder.ConfigurePrimaryHttpMessageHandler(() => (HttpClientHandler) Activator.CreateInstance(primaryHandler)!);
+                httpClientBuilder.ConfigurePrimaryHttpMessageHandler(() => (HttpClientHandler) Activator.CreateInstance(httpClientAttribute.PrimaryHandler)!);
             }
 
-            foreach (var delegatingHandler in delegatingHandlers)
+            foreach (var delegatingHandler in httpClientAttribute.DelegatingHandlers)
             {
                 services.TryAddTransient(delegatingHandler);
                 httpClientBuilder.AddHttpMessageHandler(provider => (DelegatingHandler) provider.GetRequiredService(delegatingHandler));
@@ -232,5 +234,77 @@ public static class ServiceCollectionExtensions
         }
 
         return services;
+    }
+
+    private static JsonSerializerOptions GetDefaultSerializerOptions()
+    {
+        if (_defaultSerializerOptions is not null)
+        {
+            return _defaultSerializerOptions;
+        }
+
+        _defaultSerializerOptions = new JsonSerializerOptions
+        {
+            NumberHandling = JsonNumberHandling.AllowReadingFromString,
+            PropertyNameCaseInsensitive = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
+
+        _defaultSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        _defaultSerializerOptions.Converters.Add(new JsonStringDecimalConverter());
+
+        return _defaultSerializerOptions;
+    }
+}
+
+internal class JsonStringDecimalConverter : JsonConverter<decimal>
+{
+    public override decimal Read(
+        ref Utf8JsonReader reader,
+        Type typeToConvert,
+        JsonSerializerOptions options
+    )
+    {
+        decimal ParseString(
+            string? value
+        )
+        {
+            return string.IsNullOrWhiteSpace(value)
+                ? default
+                : decimal.Parse(value.Replace(",", string.Empty));
+        }
+
+        return reader.TokenType switch
+        {
+            JsonTokenType.Number => reader.GetDecimal(),
+            JsonTokenType.String => ParseString(reader.GetString()),
+            JsonTokenType.None
+                or JsonTokenType.StartObject
+                or JsonTokenType.EndObject
+                or JsonTokenType.StartArray
+                or JsonTokenType.EndArray
+                or JsonTokenType.PropertyName
+                or JsonTokenType.Comment
+                or JsonTokenType.True
+                or JsonTokenType.False
+                or JsonTokenType.Null
+                or _ => default
+        };
+    }
+
+    public override void Write(
+        Utf8JsonWriter writer,
+        decimal value,
+        JsonSerializerOptions options
+    )
+    {
+        if (options.NumberHandling == JsonNumberHandling.WriteAsString)
+        {
+            writer.WriteStringValue(value.ToString(CultureInfo.InvariantCulture));
+        }
+        else
+        {
+            writer.WriteNumberValue(value);
+        }
     }
 }

@@ -64,7 +64,7 @@ internal static class AssemblyExtensions
         return result.Select(_ => (_.ConfigurationType, _.ConfigurationSection, _.Required));
     }
 
-    internal static IEnumerable<(Type Client, Type? PrimaryHandler, IEnumerable<Type> DelegatingHandlers, bool Required)> GetAutoIocHttpClients(
+    internal static IEnumerable<(Type ClientType, HttpClientAttribute HttpClientAttribute)> GetAutoIocHttpClients(
         this Assembly assembly
     )
     {
@@ -76,17 +76,9 @@ internal static class AssemblyExtensions
                 (type.IsClass || type.IsInterface)
                 && type.GetCustomAttributes()
                     .Any(a => a.GetType() == attribute))
-            .Select(type =>
-            {
-                var curr = (HttpClientAttribute) type.GetCustomAttributes()
-                    .Single(a => a.GetType() == attribute);
-
-                return (
-                    type,
-                    curr.PrimaryHandler,
-                    curr.DelegatingHandlers,
-                    curr.Required
-                );
-            });
+            .Select(type => (
+                type,
+                (HttpClientAttribute) type.GetCustomAttributes()
+                    .Single(a => a.GetType() == attribute)));
     }
 }

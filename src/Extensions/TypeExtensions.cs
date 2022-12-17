@@ -4,8 +4,7 @@ namespace AutoIoc.Extensions;
 
 internal static class TypeExtensions
 {
-    internal static bool IsRefitClient
-    (
+    internal static bool IsRefitClient(
         this Type type
     )
     {

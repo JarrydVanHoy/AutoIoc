@@ -8,8 +8,7 @@ public class BindOptionsAttributeTests
 {
     [Theory]
     [AutoData]
-    public void Ctor_PassedInConfigurationSection_ConfigurationSectionIsExpected
-    (
+    public void Ctor_PassedInConfigurationSection_ConfigurationSectionIsExpected(
         string configurationSection
     )
     {

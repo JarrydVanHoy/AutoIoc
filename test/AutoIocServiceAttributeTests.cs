@@ -1,7 +1,7 @@
-using System;
-using System.ComponentModel.DataAnnotations;
 using AutoFixture.Xunit2;
 using FluentAssertions;
+using System;
+using System.ComponentModel.DataAnnotations;
 using Xunit;
 
 namespace AutoIoc.UnitTests;
@@ -19,8 +19,7 @@ public class AutoIocServiceAttributeTests
 
     [Theory]
     [AutoData]
-    public void Ctor_PassedLifetimes_LifetimesIsExpected
-    (
+    public void Ctor_PassedLifetimes_LifetimesIsExpected(
         [Range(1, 4)] int iocLifetimes
     )
     {

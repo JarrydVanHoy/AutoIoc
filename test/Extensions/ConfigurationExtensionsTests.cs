@@ -1,8 +1,8 @@
-using System.Collections.Generic;
 using AutoFixture.Xunit2;
 using AutoIoc.Extensions;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
 using Xunit;
 
 namespace AutoIoc.UnitTests.Extensions;
@@ -11,8 +11,7 @@ public class ConfigurationExtensionsTests
 {
     [Theory]
     [AutoData]
-    public void GetRequiredConfiguration_SectionMissing_Throws
-    (
+    public void GetRequiredConfiguration_SectionMissing_Throws(
         string appSettingsKey
     )
     {
@@ -28,8 +27,7 @@ public class ConfigurationExtensionsTests
 
     [Theory]
     [AutoData]
-    public void GetRequiredConfiguration_WrongType_Throws
-    (
+    public void GetRequiredConfiguration_WrongType_Throws(
         string appSettingsKey,
         string randomValue
     )
@@ -49,8 +47,7 @@ public class ConfigurationExtensionsTests
 
     [Theory]
     [AutoData]
-    public void GetRequiredConfiguration_SectionExistsAndValidValue_ReturnsExpected
-    (
+    public void GetRequiredConfiguration_SectionExistsAndValidValue_ReturnsExpected(
         string appSettingsKey,
         TestConfiguration expected
     )

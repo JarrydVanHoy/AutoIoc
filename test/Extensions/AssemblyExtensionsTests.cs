@@ -31,8 +31,8 @@ public class AssemblyExtensionsTests
     {
         var result = _sut.GetAutoIocHttpClients().ToList();
 
-        result.Select(_ => _.Client).Should().Contain(typeof(TestAutoIocClient));
-        result.First(_ => _.Client == typeof(TestAutoIocClient)).DelegatingHandlers.Should().BeEmpty();
+        result.Select(_ => _.ClientType).Should().Contain(typeof(TestAutoIocClient));
+        result.First(_ => _.ClientType == typeof(TestAutoIocClient)).HttpClientAttribute.DelegatingHandlers.Should().BeEmpty();
     }
 
     public interface ITestAutoIocService

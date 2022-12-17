@@ -14,8 +14,7 @@ public class AutoIocServiceAttribute : Attribute
     ///     Will add the class to your IOC with the specified <paramref name="lifetimes" />
     /// </summary>
     /// <param name="lifetimes"></param>
-    public AutoIocServiceAttribute
-    (
+    public AutoIocServiceAttribute(
         IocLifetime lifetimes
     )
     {

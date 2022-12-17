@@ -5,8 +5,7 @@ namespace AutoIoc.Extensions;
 
 internal static class ConfigurationExtensions
 {
-    internal static T GetRequiredConfiguration<T>
-    (
+    internal static T GetRequiredConfiguration<T>(
         this IConfiguration configuration,
         string appSettingsKey
     )

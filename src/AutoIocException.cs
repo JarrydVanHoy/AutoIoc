@@ -12,16 +12,14 @@ public class AutoIocException : Exception
     ///     Creates a new exception with the specified <paramref name="message" />
     /// </summary>
     /// <param name="message"></param>
-    public AutoIocException
-    (
+    public AutoIocException(
         string message
     )
         : base(message)
     {
     }
 
-    private AutoIocException
-    (
+    private AutoIocException(
         SerializationInfo info,
         StreamingContext context
     )

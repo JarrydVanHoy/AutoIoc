@@ -1,7 +1,7 @@
+using FluentAssertions;
 using System;
 using System.Linq;
 using System.Net.Http;
-using FluentAssertions;
 using Xunit;
 
 namespace AutoIoc.UnitTests;
@@ -62,8 +62,7 @@ public class HttpClientAttributeTests
     [InlineData(typeof(int))]
     [InlineData(typeof(bool))]
     [InlineData(typeof(object))]
-    public void Ctor_NonDelegatingHandlerType_ThrowsInvalidOperationException
-    (
+    public void Ctor_NonDelegatingHandlerType_ThrowsInvalidOperationException(
         Type delegatingHandler
     )
     {
@@ -76,8 +75,7 @@ public class HttpClientAttributeTests
     [Theory]
     [InlineData(typeof(Test1DelegatingHandler))]
     [InlineData(typeof(Test2DelegatingHandler))]
-    public void Ctor_PassedSingleHandler_DelegatingHandlersIsExpected
-    (
+    public void Ctor_PassedSingleHandler_DelegatingHandlersIsExpected(
         Type delegatingHandler
     )
     {
@@ -109,8 +107,7 @@ public class HttpClientAttributeTests
     [Theory]
     [InlineData(typeof(Test1DelegatingHandler), typeof(Test2DelegatingHandler))]
     [InlineData(typeof(Test2DelegatingHandler), typeof(Test1DelegatingHandler))]
-    public void Ctor_MultipleHandlersPassedIn_DelegatingHandlersOrderRetained
-    (
+    public void Ctor_MultipleHandlersPassedIn_DelegatingHandlersOrderRetained(
         Type delegatingHandler1,
         Type delegatingHandler2
     )

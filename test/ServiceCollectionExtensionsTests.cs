@@ -1,9 +1,9 @@
-using System.Collections.Generic;
-using System.Reflection;
 using AutoIoc.UnitTests.Extensions;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Generic;
+using System.Reflection;
 using Xunit;
 
 namespace AutoIoc.UnitTests;

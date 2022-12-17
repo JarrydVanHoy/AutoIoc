@@ -193,6 +193,19 @@ public class BananaService
 }
 ```
 
+##### Prerequisites 
+
+This will look for the `BaseAddress` and `TimeoutSeconds` (OPTIONAL) keys in your appsettings under the default parent key of your client's name minus the `*Client` postfix.  For example, if your client's interface is `IGoosfrabaClient`, then next your settings as follows:
+
+```json
+{
+  "Goosfraba": {
+    "BaseAddress": "https://goosfraba.com",
+    "TimeoutSeconds": 100
+  }
+}
+```
+
 #### Delegating Handlers
 
 Need to add delegating handlers? Well this is how you used to do it:

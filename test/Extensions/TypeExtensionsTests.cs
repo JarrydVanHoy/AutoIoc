@@ -1,8 +1,8 @@
-using System;
-using System.Threading.Tasks;
 using AutoIoc.Extensions;
 using FluentAssertions;
 using Refit;
+using System;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace AutoIoc.UnitTests.Extensions;
@@ -12,8 +12,7 @@ public class TypeExtensionsTests
     [Theory]
     [InlineData(typeof(INonRefitInterface))]
     [InlineData(typeof(NonRefitConcrete))]
-    public void IsRefitClient_NotRefitType_ReturnsFalse
-    (
+    public void IsRefitClient_NotRefitType_ReturnsFalse(
         Type type
     )
     {

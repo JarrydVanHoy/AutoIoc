@@ -1,5 +1,6 @@
 using AutoIoc.Extensions;
 using FluentAssertions;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Xunit;
@@ -48,6 +49,12 @@ public class AssemblyExtensionsTests
     [BindOptions(nameof(TestAutoIocConfig))]
     public class TestAutoIocConfig
     {
+    }
+
+    [BindOptions(nameof(TestAutoIocConfig))]
+    public class TestChildAutoIocConfig : TestAutoIocClient
+    {
+        public List<string> Type { get; set; }
     }
 
     public interface ITestAutoIocClient

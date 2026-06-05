@@ -193,6 +193,43 @@ public class BananaService
 }
 ```
 
+#### HttpClientBuilder Configuration
+
+Need a way to add configurations to your HttpClient?
+Implementing a custom `IHttpClientBuilderConfiguration` allows you to do that.  
+
+For example, add resilience handlers to your HTTP client.
+```C#
+[HttpClient]
+[HttpClientBuilderConfiguraton(typeof(DbzClientConfigurator))]
+public interface IDbzClient
+{
+    [Get("/foo/bar")]
+    Task<ApiResponse<string>> GetFooBarAsync();
+}
+
+public class DbzClientConfigurator : IHttpClientBuilderConfiguration
+{
+    public void Configure(IHttpClientBuilder builder)
+    {
+        //builder.AddStandardResilienceHandler();
+        
+        // or
+        
+        // builder.AddResilienceHandler("pipeline-name", pipeline =>
+        // {
+        //     pipeline.AddRetry(new HttpRetryStrategyOptions
+        //     { 
+        //         MaxRetryAttempts = 5,
+        //         BackoffType = DelayBackoffType.Exponential,
+        //         UseJitter = true
+        //     });
+        // });
+    }
+}
+
+```
+
 ##### Prerequisites 
 
 This will look for the `BaseAddress` and `TimeoutSeconds` (OPTIONAL) keys in your appsettings under the default parent key of your client's name minus the `*Client` postfix.  For example, if your client's interface is `IGoosfrabaClient`, then next your settings as follows:

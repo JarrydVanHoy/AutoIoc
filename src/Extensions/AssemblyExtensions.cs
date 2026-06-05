@@ -61,7 +61,7 @@ internal static class AssemblyExtensions
             ))
             .ToList();
 
-        return result.Select(_ => (_.ConfigurationType, _.ConfigurationSection, _.Required));
+        return result.Select(r => (r.ConfigurationType, r.ConfigurationSection, r.Required));
     }
 
     internal static IEnumerable<(Type ClientType, HttpClientAttribute HttpClientAttribute)> GetAutoIocHttpClients(

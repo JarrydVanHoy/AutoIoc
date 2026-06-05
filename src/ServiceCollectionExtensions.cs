@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Refit;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
 using System.Text.Json;
@@ -17,11 +18,11 @@ namespace AutoIoc;
 /// </summary>
 public static class ServiceCollectionExtensions
 {
-    private static readonly HashSet<Assembly> Init = new();
+    private static readonly HashSet<Assembly> Init = [];
     private static JsonSerializerOptions? _defaultSerializerOptions;
 
     /// <summary>
-    ///     Adds AutoIoc to your project which will assembly scan for services, options, and HTTP clients to add to your DI container.
+    ///     Adds AutoIoc to your project, which will assembly scan for services, options, and HTTP clients to add to your DI container.
     /// </summary>
     /// <param name="services"></param>
     /// <param name="configuration"></param>
@@ -33,11 +34,11 @@ public static class ServiceCollectionExtensions
         Assembly assembly
     )
     {
-        return services.AddAutoIoc(configuration, new[] {assembly});
+        return services.AddAutoIoc(configuration, [assembly]);
     }
 
     /// <summary>
-    ///     Adds AutoIoc to your project which will assembly scan for services, options, and HTTP clients to add to your DI container.
+    ///     Adds AutoIoc to your project, which will assembly scan for services, options, and HTTP clients to add to your DI container.
     /// </summary>
     /// <param name="services"></param>
     /// <param name="configuration"></param>
@@ -76,10 +77,10 @@ public static class ServiceCollectionExtensions
         Assembly assembly
     )
     {
-        var iocServices = assembly.GetAutoIocServices().ToList();
-        var lifetimeLookup = Enum.GetValues<IocLifetime>().Where(_ => _ is not IocLifetime.None).ToList();
+        var iocServices = assembly.GetAutoIocServices().ToArray();
+        var lifetimeLookup = Enum.GetValues<IocLifetime>().Where(l => l is not IocLifetime.None).ToArray();
 
-        if (!iocServices.Any())
+        if (iocServices.Length == 0)
         {
             return services;
         }
@@ -87,8 +88,7 @@ public static class ServiceCollectionExtensions
         foreach (var (service, lifetimes) in iocServices)
         {
             foreach (var @interface in service.GetInterfaces()
-                         .Where(i => i != typeof(IAsyncDisposable) && i != typeof(IDisposable))
-                         .ToList())
+                         .Where(i => i != typeof(IAsyncDisposable) && i != typeof(IDisposable)))
             {
                 foreach (var lifetime in lifetimeLookup.Where(flag => lifetimes.HasFlag(flag)))
                 {
@@ -120,9 +120,9 @@ public static class ServiceCollectionExtensions
         IConfiguration configuration
     )
     {
-        var options = assembly.GetAutoIocOptions().ToList();
+        var options = assembly.GetAutoIocOptions().ToArray();
 
-        if (!options.Any())
+        if (options.Length == 0)
         {
             return services;
         }
@@ -158,6 +158,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+    [SuppressMessage("ReSharper", "UnusedMethodReturnValue.Local")]
     private static IServiceCollection AddAutoIocHttpClients(
         this IServiceCollection services,
         Assembly assembly,
@@ -166,11 +167,11 @@ public static class ServiceCollectionExtensions
     {
         var addHttpClientMethodInfo = typeof(HttpClientFactoryServiceCollectionExtensions)
             .GetMethods()
-            .Single(_ => _.ToString() == "Microsoft.Extensions.DependencyInjection.IHttpClientBuilder AddHttpClient[TClient,TImplementation](Microsoft.Extensions.DependencyInjection.IServiceCollection)");
+            .Single(m => m.ToString() == "Microsoft.Extensions.DependencyInjection.IHttpClientBuilder AddHttpClient[TClient,TImplementation](Microsoft.Extensions.DependencyInjection.IServiceCollection)");
 
-        var clients = assembly.GetAutoIocHttpClients().ToList();
+        var clients = assembly.GetAutoIocHttpClients().ToArray();
 
-        if (!clients.Any())
+        if (clients.Length == 0)
         {
             return services;
         }
@@ -205,11 +206,15 @@ public static class ServiceCollectionExtensions
                     .AddRefitClient(
                         client,
                         new RefitSettings(new SystemTextJsonContentSerializer(httpClientAttribute.JsonSerializerOptions ?? GetDefaultSerializerOptions())))
-                    .ConfigureHttpClient(_ =>
+                    .ConfigureHttpClient(h =>
                     {
-                        _.BaseAddress = httpClientConfiguration.BaseAddress
+                        h.BaseAddress = httpClientConfiguration.BaseAddress
                                         ?? throw new AutoIocException($"App settings missing value for key '{appSettingsKey}.{nameof(HttpClientConfiguration.BaseAddress)}'.");
-                        _.Timeout = TimeSpan.FromSeconds(Math.Abs(httpClientConfiguration.TimeoutSeconds));
+                        h.Timeout = httpClientConfiguration.TimeoutSeconds is -1
+                            ? Timeout.InfiniteTimeSpan
+                            : httpClientConfiguration.TimeoutSeconds > 0 
+                                ? TimeSpan.FromSeconds(httpClientConfiguration.TimeoutSeconds)
+                                : throw new AutoIocException($"App settings value is invalid for key '{appSettingsKey}.{nameof(HttpClientConfiguration.TimeoutSeconds)}'.");
                     });
             }
             else
@@ -218,7 +223,7 @@ public static class ServiceCollectionExtensions
 
                 httpClientBuilder = (IHttpClientBuilder) addHttpClientMethodInfo
                     .MakeGenericMethod(@interface, client)
-                    .Invoke(null, new object[] {services})!;
+                    .Invoke(null, [services])!;
             }
 
             if (httpClientAttribute.PrimaryHandler is not null)
@@ -265,20 +270,11 @@ internal class JsonStringDecimalConverter : JsonConverter<decimal>
         JsonSerializerOptions options
     )
     {
-        decimal ParseString(
-            string? value
-        )
-        {
-            return string.IsNullOrWhiteSpace(value)
-                ? default
-                : decimal.Parse(value.Replace(",", string.Empty));
-        }
-
         return reader.TokenType switch
         {
             JsonTokenType.Number => reader.GetDecimal(),
             JsonTokenType.String => ParseString(reader.GetString()),
-            JsonTokenType.None
+            /* JsonTokenType.None
                 or JsonTokenType.StartObject
                 or JsonTokenType.EndObject
                 or JsonTokenType.StartArray
@@ -287,9 +283,16 @@ internal class JsonStringDecimalConverter : JsonConverter<decimal>
                 or JsonTokenType.Comment
                 or JsonTokenType.True
                 or JsonTokenType.False
-                or JsonTokenType.Null
-                or _ => default
+                or JsonTokenType.Null */
+            _ => 0m
         };
+
+        decimal ParseString(string? value)
+        {
+            return string.IsNullOrWhiteSpace(value)
+                ? 0m
+                : decimal.Parse(value.Replace(",", string.Empty));
+        }
     }
 
     public override void Write(

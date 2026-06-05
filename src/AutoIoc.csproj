@@ -15,9 +15,9 @@
         <Description>Easily add dependencies to your dependency injection container with attributes. This includes services, options, and HTTP clients.</Description>
         <PackageTags>autoioc auto ioc di inversion control dependency injection attribute</PackageTags>
         <PackageReleaseNotes>
-            Upgrading NuGet packages due to security issue found in ReFit library
+            Allowing for infinite HTTP client timeouts and disallowing zero and negative timeouts.
         </PackageReleaseNotes>
-        <Version>1.5.0</Version>
+        <Version>1.6.0</Version>
         <PackageIcon>icon.jpeg</PackageIcon>
     </PropertyGroup>
 

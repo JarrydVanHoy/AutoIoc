@@ -166,14 +166,16 @@ public static class ServiceCollectionExtensions
     {
         var addHttpClientMethodInfo = typeof(HttpClientFactoryServiceCollectionExtensions)
             .GetMethods()
-            .Single(_ => _.ToString() == "Microsoft.Extensions.DependencyInjection.IHttpClientBuilder AddHttpClient[TClient,TImplementation](Microsoft.Extensions.DependencyInjection.IServiceCollection)");
+            .Single(i => i.ToString() == "Microsoft.Extensions.DependencyInjection.IHttpClientBuilder AddHttpClient[TClient,TImplementation](Microsoft.Extensions.DependencyInjection.IServiceCollection)");
 
         var clients = assembly.GetAutoIocHttpClients().ToList();
 
-        if (!clients.Any())
+        if (clients.Count == 0)
         {
             return services;
         }
+        
+        using var serviceProvider = services.BuildServiceProvider();
 
         foreach (var (client, httpClientAttribute) in clients)
         {
@@ -205,11 +207,11 @@ public static class ServiceCollectionExtensions
                     .AddRefitClient(
                         client,
                         new RefitSettings(new SystemTextJsonContentSerializer(httpClientAttribute.JsonSerializerOptions ?? GetDefaultSerializerOptions())))
-                    .ConfigureHttpClient(_ =>
+                    .ConfigureHttpClient(httpClient =>
                     {
-                        _.BaseAddress = httpClientConfiguration.BaseAddress
-                                        ?? throw new AutoIocException($"App settings missing value for key '{appSettingsKey}.{nameof(HttpClientConfiguration.BaseAddress)}'.");
-                        _.Timeout = TimeSpan.FromSeconds(Math.Abs(httpClientConfiguration.TimeoutSeconds));
+                        httpClient.BaseAddress = httpClientConfiguration.BaseAddress
+                                                 ?? throw new AutoIocException($"App settings missing value for key '{appSettingsKey}.{nameof(HttpClientConfiguration.BaseAddress)}'.");
+                        httpClient.Timeout = TimeSpan.FromSeconds(Math.Abs(httpClientConfiguration.TimeoutSeconds));
                     });
             }
             else
@@ -218,7 +220,7 @@ public static class ServiceCollectionExtensions
 
                 httpClientBuilder = (IHttpClientBuilder) addHttpClientMethodInfo
                     .MakeGenericMethod(@interface, client)
-                    .Invoke(null, new object[] {services})!;
+                    .Invoke(null, [services])!;
             }
 
             if (httpClientAttribute.PrimaryHandler is not null)
@@ -231,6 +233,18 @@ public static class ServiceCollectionExtensions
                 services.TryAddTransient(delegatingHandler);
                 httpClientBuilder.AddHttpMessageHandler(provider => (DelegatingHandler) provider.GetRequiredService(delegatingHandler));
             }
+            
+            var httpClientConfiguratorBuilderAttribute = client.GetCustomAttribute<HttpClientBuilderConfiguratonAttribute>();
+            if (httpClientConfiguratorBuilderAttribute is null)
+            {
+                continue;
+            }
+            
+            var httpClientBuilderConfiguration = (IHttpClientBuilderConfiguration)ActivatorUtilities.CreateInstance(
+                serviceProvider, 
+                httpClientConfiguratorBuilderAttribute.ConfiguratorType);
+            
+            httpClientBuilderConfiguration.Configure(httpClientBuilder);
         }
 
         return services;

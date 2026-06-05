@@ -242,6 +242,7 @@ This will look for the `BaseAddress` and `TimeoutSeconds` (OPTIONAL) keys in you
   }
 }
 ```
+Specifying a `TimeoutSeconds` of `-1` will set the timeout to `Infinite`, but anything else equal to or less than `0` will be throw an exception.
 
 #### Delegating Handlers
 

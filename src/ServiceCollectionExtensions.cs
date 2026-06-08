@@ -176,9 +176,12 @@ public static class ServiceCollectionExtensions
             return services;
         }
         
-        using var serviceProvider = services.BuildServiceProvider();
+        var hasHttpClientBuilderConfigurationAttribute = Array.Exists(clients, c => c.HttpClientBuilderConfigurationAttribute is not null);
+        var serviceProvider = hasHttpClientBuilderConfigurationAttribute
+            ? services.BuildServiceProvider()
+            : null;
 
-        foreach (var (client, httpClientAttribute) in clients)
+        foreach (var (client, httpClientAttribute, httpClientBuilderConfigurationAttribute) in clients)
         {
             IHttpClientBuilder httpClientBuilder;
 
@@ -239,15 +242,14 @@ public static class ServiceCollectionExtensions
                 httpClientBuilder.AddHttpMessageHandler(provider => (DelegatingHandler) provider.GetRequiredService(delegatingHandler));
             }
             
-            var httpClientConfiguratorBuilderAttribute = client.GetCustomAttribute<HttpClientBuilderConfiguratonAttribute>();
-            if (httpClientConfiguratorBuilderAttribute is null)
+            if (httpClientBuilderConfigurationAttribute is null)
             {
                 continue;
             }
-            
-            var httpClientBuilderConfiguration = (IHttpClientBuilderConfiguration)ActivatorUtilities.CreateInstance(
-                serviceProvider, 
-                httpClientConfiguratorBuilderAttribute.ConfiguratorType);
+
+            var httpClientBuilderConfiguration = (IHttpClientBuilderConfiguration) ActivatorUtilities.CreateInstance(
+                serviceProvider!,
+                httpClientBuilderConfigurationAttribute.ConfiguratorType);
             
             httpClientBuilderConfiguration.Configure(httpClientBuilder);
         }

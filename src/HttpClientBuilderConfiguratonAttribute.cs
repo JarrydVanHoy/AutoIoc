@@ -8,7 +8,7 @@ namespace AutoIoc;
 ///     has been registered.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
-public class HttpClientBuilderConfiguratonAttribute(Type configuratorType) : Attribute
+public class HttpClientBuilderConfigurationAttribute(Type configuratorType) : Attribute
 {
     internal readonly Type ConfiguratorType = ValidateConfiguratorType(configuratorType);
 

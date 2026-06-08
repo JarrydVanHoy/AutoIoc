@@ -201,14 +201,14 @@ Implementing a custom `IHttpClientBuilderConfiguration` allows you to do that.
 For example, add resilience handlers to your HTTP client.
 ```C#
 [HttpClient]
-[HttpClientBuilderConfiguraton(typeof(DbzClientConfigurator))]
+[HttpClientBuilderConfiguration(typeof(DbzClientConfiguration))]
 public interface IDbzClient
 {
     [Get("/foo/bar")]
     Task<ApiResponse<string>> GetFooBarAsync();
 }
 
-public class DbzClientConfigurator : IHttpClientBuilderConfiguration
+public class DbzClientConfiguration : IHttpClientBuilderConfiguration
 {
     public void Configure(IHttpClientBuilder builder)
     {

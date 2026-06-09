@@ -175,7 +175,7 @@ public static class ServiceCollectionExtensions
         {
             return services;
         }
-
+        
         foreach (var (client, httpClientAttribute) in clients)
         {
             IHttpClientBuilder httpClientBuilder;
@@ -225,7 +225,13 @@ public static class ServiceCollectionExtensions
                     .MakeGenericMethod(@interface, client)
                     .Invoke(null, [services])!;
             }
-
+            
+            if (httpClientAttribute.BuilderConfiguration is not null)
+            {
+                var httpClientBuilderConfiguration = (IHttpClientBuilderConfiguration) Activator.CreateInstance(httpClientAttribute.BuilderConfiguration)!;
+                httpClientBuilderConfiguration.Configure(httpClientBuilder, configuration);
+            }
+            
             if (httpClientAttribute.PrimaryHandler is not null)
             {
                 httpClientBuilder.ConfigurePrimaryHttpMessageHandler(() => (HttpClientHandler) Activator.CreateInstance(httpClientAttribute.PrimaryHandler)!);

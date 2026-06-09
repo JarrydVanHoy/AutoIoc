@@ -232,5 +232,46 @@ public class AuthDelegatingHandler : DelegatingHandler { }
 [HttpClient(typeof(AuthDelegatingHandler), typeof(RandomDelegatingHandler))]  
 ```
 
+
+#### HttpClientBuilder Configuration
+
+Need a way to add builder level configurations to your HttpClient?  Specify the `BuilderConfiguration` property on your interface.
+
+
+For example, add resilience handlers to your HTTP client.
+```C#
+[HttpClient(typeof(AuthDelegatingHandler), BuilderConfiguration = typeof(DbzClientConfiguration)]
+public interface IDbzClient
+{
+    [Get("/foo/bar")]
+    Task<ApiResponse<string>> GetFooBarAsync();
+}
+
+public class DbzClientConfiguration : IHttpClientBuilderConfiguration
+{
+    public void Configure(IHttpClientBuilder builder, IConfiguration configuration)
+    {
+        //builder.AddStandardResilienceHandler();
+        
+        // or
+        
+        // builder.AddResilienceHandler("pipeline-name", pipeline =>
+        // {
+        //     pipeline
+        //        .AddTimeout(TimeSpan.FromSeconds(30))   // outer: total budget
+        //        .AddRetry(new HttpRetryStrategyOptions
+        //        { 
+        //            MaxRetryAttempts = 5,
+        //            BackoffType = DelayBackoffType.Exponential,
+        //            UseJitter = true
+        //        })
+        //        .AddTimeout(TimeSpan.FromSeconds(10));  // inner: per-attempt
+        // });
+        
+        // or your own custom configuration
+    }
+}
+```
+
 ---
 Ping me if you want any new features added to the library ❤️

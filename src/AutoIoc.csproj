@@ -15,9 +15,9 @@
         <Description>Easily add dependencies to your dependency injection container with attributes. This includes services, options, and HTTP clients.</Description>
         <PackageTags>autoioc auto ioc di inversion control dependency injection attribute</PackageTags>
         <PackageReleaseNotes>
-            Allowing for infinite HTTP client timeouts and disallowing zero and negative timeouts.
+            Allowing for HTTP client builder configurations.
         </PackageReleaseNotes>
-        <Version>1.6.0</Version>
+        <Version>1.7.0</Version>
         <PackageIcon>icon.jpeg</PackageIcon>
     </PropertyGroup>
 

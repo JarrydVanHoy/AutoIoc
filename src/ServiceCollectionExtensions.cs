@@ -225,9 +225,11 @@ public static class ServiceCollectionExtensions
                     .MakeGenericMethod(@interface, client)
                     .Invoke(null, [services])!;
             }
-            
+             
             if (httpClientAttribute.BuilderConfiguration is not null)
             {
+                services.TryAddTransient<BufferResponseContentHandler>();
+                httpClientBuilder.AddHttpMessageHandler<BufferResponseContentHandler>();
                 var httpClientBuilderConfiguration = (IHttpClientBuilderConfiguration) Activator.CreateInstance(httpClientAttribute.BuilderConfiguration)!;
                 httpClientBuilderConfiguration.Configure(httpClientBuilder, configuration);
             }

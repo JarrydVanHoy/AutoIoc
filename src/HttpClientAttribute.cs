@@ -12,6 +12,7 @@ public class HttpClientAttribute : Attribute
 {
     internal readonly IEnumerable<Type> DelegatingHandlers;
     private Type? _primaryHandler;
+    private Type? _builderConfiguration;
 
     /// <summary>
     ///     Adds your service as a transient and adds an HTTP client to the client factory.
@@ -20,7 +21,7 @@ public class HttpClientAttribute : Attribute
     /// </summary>
     public HttpClientAttribute()
     {
-        DelegatingHandlers = Array.Empty<Type>();
+        DelegatingHandlers = [];
     }
 
     /// <summary>
@@ -43,6 +44,15 @@ public class HttpClientAttribute : Attribute
     {
         get => _primaryHandler;
         set => _primaryHandler = ValidatePrimaryHandlerHandlerType(value);
+    }
+    
+    /// <summary>
+    ///  Specify a HttpClientBuilder configuration.
+    /// </summary>
+    public Type? BuilderConfiguration
+    {
+        get => _builderConfiguration;
+        set => _builderConfiguration = ValidateBuilderConfiguratorType(value);
     }
 
     /// <summary>
@@ -94,5 +104,21 @@ public class HttpClientAttribute : Attribute
         }
 
         return primaryHandler;
+    }
+    
+    private static Type? ValidateBuilderConfiguratorType(Type? builderConfiguration)
+    {
+        if (builderConfiguration is null)
+        {
+            return null;
+        }
+
+        if (!typeof(IHttpClientBuilderConfiguration).IsAssignableFrom(builderConfiguration))
+        {
+            throw new ArgumentException($"The builder configuration must implement: '{nameof(IHttpClientBuilderConfiguration)}'",
+                nameof(builderConfiguration));
+        }
+
+        return builderConfiguration;
     }
 }

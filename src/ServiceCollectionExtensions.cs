@@ -176,12 +176,7 @@ public static class ServiceCollectionExtensions
             return services;
         }
         
-        var hasHttpClientBuilderConfigurationAttribute = Array.Exists(clients, c => c.HttpClientBuilderConfigurationAttribute is not null);
-        var serviceProvider = hasHttpClientBuilderConfigurationAttribute
-            ? services.BuildServiceProvider()
-            : null;
-
-        foreach (var (client, httpClientAttribute, httpClientBuilderConfigurationAttribute) in clients)
+        foreach (var (client, httpClientAttribute) in clients)
         {
             IHttpClientBuilder httpClientBuilder;
 
@@ -230,7 +225,13 @@ public static class ServiceCollectionExtensions
                     .MakeGenericMethod(@interface, client)
                     .Invoke(null, [services])!;
             }
-
+            
+            if (httpClientAttribute.BuilderConfiguration is not null)
+            {
+                var httpClientBuilderConfiguration = (IHttpClientBuilderConfiguration) Activator.CreateInstance(httpClientAttribute.BuilderConfiguration)!;
+                httpClientBuilderConfiguration.Configure(httpClientBuilder, configuration);
+            }
+            
             if (httpClientAttribute.PrimaryHandler is not null)
             {
                 httpClientBuilder.ConfigurePrimaryHttpMessageHandler(() => (HttpClientHandler) Activator.CreateInstance(httpClientAttribute.PrimaryHandler)!);
@@ -241,17 +242,6 @@ public static class ServiceCollectionExtensions
                 services.TryAddTransient(delegatingHandler);
                 httpClientBuilder.AddHttpMessageHandler(provider => (DelegatingHandler) provider.GetRequiredService(delegatingHandler));
             }
-            
-            if (httpClientBuilderConfigurationAttribute is null)
-            {
-                continue;
-            }
-
-            var httpClientBuilderConfiguration = (IHttpClientBuilderConfiguration) ActivatorUtilities.CreateInstance(
-                serviceProvider!,
-                httpClientBuilderConfigurationAttribute.ConfiguratorType);
-            
-            httpClientBuilderConfiguration.Configure(httpClientBuilder);
         }
 
         return services;

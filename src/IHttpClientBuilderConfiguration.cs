@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AutoIoc;
@@ -8,5 +9,5 @@ namespace AutoIoc;
 /// </summary>
 public interface IHttpClientBuilderConfiguration
 {
-    void Configure(IHttpClientBuilder builder);
+    void Configure(IHttpClientBuilder builder, IConfiguration configuration);
 }

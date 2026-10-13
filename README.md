@@ -33,7 +33,7 @@ services.AddSingleton<IService1, Service1>()
     .AddSingleton<IService100, Service100>();
 ```
 
-Well this package makes that much easier. It will scan your assembly and fine items that need to be added to your DI
+Well this package makes that much easier. It will scan your assembly and find items that need to be added to your DI
 container based on attributes.
 
 ## NuGet Installation
@@ -43,6 +43,8 @@ Install the [AutoIoc NuGet package](https://nuget.org/packages/AutoIoc):
 ```.NET CLI
 dotnet add package AutoIoc
 ```
+
+Supports .NET 8 and .NET 10.
 
 ## Usage
 
@@ -98,7 +100,7 @@ public interface IExample {}
 Create your POCO class and add the following attribute with the desired app settings key:
 
 ```C#
-// This will automatically bind the the key `Example`
+// This will automatically bind the key `Example`
 [BindOptions]
 public class ExampleConfiguration
 {
@@ -106,7 +108,7 @@ public class ExampleConfiguration
     public string Bar { get; set; }
 }
 
-// This will bind the the key `Foo:Bar`
+// This will bind the key `Foo:Bar`
 [BindOptions("Foo:Bar")]
 public class ExampleConfiguration
 {
@@ -130,7 +132,7 @@ public class BananaService
 
 #### Typical Route
 
-Normally I see developer creating a client class that injects a name HTTP client from the factory like as follows:
+Normally I see developers creating a client class that injects a name HTTP client from the factory like as follows:
 
 ```C#
 public interface IDbzClient{}
@@ -165,7 +167,7 @@ to your `Startup.cs`:
 
 ```C#
 [HttpClient]
-public class IDbzClient
+public interface IDbzClient
 {
     [Get("/foo/bar")]
     Task<ApiResponse<string>> GetFooBarAsync();
@@ -195,7 +197,7 @@ public class BananaService
 
 ##### Prerequisites 
 
-This will look for the `BaseAddress` and `TimeoutSeconds` (OPTIONAL) keys in your appsettings under the default parent key of your client's name minus the `*Client` postfix.  For example, if your client's interface is `IGoosfrabaClient`, then next your settings as follows:
+This will look for the `BaseAddress` and `TimeoutSeconds` (OPTIONAL) keys in your appsettings under the default parent key of your client's name minus the `*Client` postfix.  For example, if your client's interface is `IGoosfrabaClient`, then nest your settings as follows:
 
 ```json
 {
@@ -205,7 +207,7 @@ This will look for the `BaseAddress` and `TimeoutSeconds` (OPTIONAL) keys in you
   }
 }
 ```
-Specifying a `TimeoutSeconds` of `-1` will set the timeout to `Infinite`, but anything else equal to or less than `0` will be throw an exception.
+Specifying a `TimeoutSeconds` of `-1` will set the timeout to `Infinite`, but anything else equal to or less than `0` will throw an exception.
 
 #### Delegating Handlers
 
@@ -240,7 +242,7 @@ Need a way to add builder level configurations to your HttpClient?  Specify the 
 
 For example, add resilience handlers to your HTTP client.
 ```C#
-[HttpClient(typeof(AuthDelegatingHandler), BuilderConfiguration = typeof(DbzClientConfiguration)]
+[HttpClient(typeof(AuthDelegatingHandler), BuilderConfiguration = typeof(DbzClientConfiguration))]
 public interface IDbzClient
 {
     [Get("/foo/bar")]
